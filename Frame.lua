@@ -7,7 +7,7 @@ end
 
 function Frame:NewElement(name, type)
    if type == "text" then
-      self.elements[name] = {e_type = type, id = math.random(os.time()/4, os.time()/2), text = "", x = 0, y = 0, w = 100, h = 100, c1 = 0xf, c2 = 0xf, type = 1, fix = false}
+      self.elements[name] = {e_type = type, id = math.random(os.time()/4), text = "", x = 0, y = 0, w = 100, h = 100, c1 = 0xf, c2 = 0xf, type = 1, fix = false}
    
       local element = self.elements[name]
 
@@ -50,9 +50,9 @@ function Frame:NewElement(name, type)
       end
 
       function element:BorderColor3(r, g, b)
-           self.c2 = bit32.bor(bit32.lshift(r, 16),  bit32.lshift(g, 8), b) or self.c2
-           return self
-	    end
+          self.c2 = bit32.bor(bit32.lshift(r, 16),  bit32.lshift(g, 8), b) or self.c2
+          return self
+	     end
       return element
    elseif type == "image" then
       self.elements[name] = {e_type = type, id, image = "149a49e4b38.jpg", type = ":0", x = 0, y = 0, w = 1, h = 1, rotation = 0, alpha = 1, anchorX = 0, anchorY = 0}
