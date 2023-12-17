@@ -28,7 +28,7 @@ function Frame:NewElement(name, type)
           return self
       end
 
-      function element:fix(fixed)
+      function element:Fix(fixed)
            self.fix = fixed or self.fix
            return self
       end
