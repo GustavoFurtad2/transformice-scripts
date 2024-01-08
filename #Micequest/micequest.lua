@@ -4,7 +4,7 @@ do local s = {"AutoNewGame", "AutoShaman", "AfkDeath"}
 	 end
 end
 
-tfm.exec.newGame[[<C><P MEDATA=";;;;-0;0:::1-"/><Z><S/><D/><O/><L/></Z></C>]]
+tfm.exec.newGame[[<C><P G="0,0" MEDATA=";0,1;;;-0;0:::1-"/><Z><S/><D><DS X="400" Y="200"/></D><O/><L/></Z></C>]]
 ui.setMapName("#Micequest")
 
 local Data = {}
@@ -19,6 +19,13 @@ local RES = {
      ["1"   ] = "18cbc59fb0d.png",
    },
  },
+ SPRITES = {
+   MICE = {
+     ["DOWN"] = "17eed490d4e.png",
+     ["RIGHT"] = "17eed4e062c.png",
+     ["UP"] = "17eed52eb45.png",
+   },
+ },
 }
 
 local RemoveImageList = function(src)
@@ -31,19 +38,24 @@ math.integer = function(n)
 	  return n == math.floor(n)
 end
 
+local KEY_W, KEY_A, KEY_S, KEY_D = 87, 65, 83, 68
+
 local Player = function(name)
 		local instance = {
-			level = 1, life = 0, lastLife = 0, maxLife = 10, exp = 0, maxExp = 90, health = {},
-            isDead = false
+         level = 1, life = 0, lastLife = 0, maxLife = 10, exp = 0, maxExp = 90, health = {},
+         x = 400,
+         y = 200,
+         frame,
+         isDead = false
       }
 
       function instance:addExp(exp)
 
-			 local sum = self.exp + exp
-			 if sum >= self.maxExp then
-              self.level = self.level + math.floor(sum / self.maxExp)
-              self.exp = exp % self.maxExp
-			 else
+          local sum = self.exp + exp
+          if sum >= self.maxExp then
+              	self.level = self.level + math.floor(sum / self.maxExp)
+              	self.exp = exp % self.maxExp
+          else
               self.exp = sum
           end
       end
@@ -72,7 +84,7 @@ local Player = function(name)
  	               RemoveImageList(self.health)
 	 	        end
 
-		        self.health = {}
+				self.health = {}
        	    for i = 1, math.floor(self.life) do
            	    self.health[i] = tfm.exec.addImage(RES.Icons.Health["1"], ":0", (i-1) * 25, 30, name)
 		        end
@@ -81,7 +93,7 @@ local Player = function(name)
            		  if RES.Icons.Health["0."..tostring(self.life):sub(3,3).."0"] then
              		 	self.health[#self.health+1] = tfm.exec.addImage(RES.Icons.Health["0."..tostring(self.life):sub(3,3) .. "0"], ":0", (#self.health) * 25, 30, name)
              		  elseif RES.Icons.Health["0."..tostring(self.life):sub(3,3).."5"] then
-              	    self.health[#self.health+1] = tfm.exec.addImage(RES.Icons.Health["0."..tostring(self.life):sub(3,3) .. "5"], ":0", (#self.health) * 25, 30, name)
+              	     self.health[#self.health+1] = tfm.exec.addImage(RES.Icons.Health["0."..tostring(self.life):sub(3,3) .. "5"], ":0", (#self.health) * 25, 30, name)
 		              end
              end
          		for i = math.floor(self.life), 8 do
@@ -89,22 +101,75 @@ local Player = function(name)
          		end
          end
       end
+
+      function instance:updateSprite(frame, w, h)
+         if self.frame ~= nil then
+            tfm.exec.removeImage(self.frame)
+         end
+         self.frame = tfm.exec.addImage(RES.SPRITES.MICE[frame], "%" .. name, w > 0 and -15 or 15, -50, nil, w, h)
+      end
+
+      function instance:keys(key)
+         if key == KEY_W then
+             self:updateSprite("UP", 2, 2)
+             self.y = self.y - 25
+             tfm.exec.movePlayer(name, self.x, self.y)
+         elseif key == KEY_A then
+             self:updateSprite("RIGHT", -2, 2)
+             self.x = self.x - 25
+             tfm.exec.movePlayer(name, self.x, self.y)
+         elseif key == KEY_S then
+             self:updateSprite("DOWN", 2, 2)
+             self.y = self.y + 25
+             tfm.exec.movePlayer(name, self.x, self.y)
+         elseif key == KEY_D then
+             self:updateSprite("RIGHT", 2, 2)
+             self.x = self.x + 25
+             tfm.exec.movePlayer(name, self.x, self.y)
+         end
+      end
+
+      function instance:SetPos(x, y)
+         self.x = x
+         self.y = y
+      end
       return instance
 end
 
 eventNewPlayer = function (name)
-	  Data[name] = Data[name] or Player(name)
-     Data[name]:addExp(190)
+   tfm.exec.respawnPlayer(name)
+
+   Data[name] = Data[name] or Player(name)
+   Data[name]:addExp(190)
    Data[name]:updateHealth()
+   tfm.exec.freezePlayer(name, true, false)
+   for _, v in next, {KEY_W, KEY_A, KEY_S, KEY_D} do
+     tfm.exec.bindKeyboard(name, v, true, true)
+   end
+   Data[name]:updateSprite("DOWN", 2, 2)
+end
+
+eventKeyboard = function(name, key, down, x, y)
+  if Data[name].isDead == false then
+	  Data[name]:keys(key)
+  end
 end
 
 for name in next, tfm.get.room.playerList do
 	  eventNewPlayer(name)
 end
 
+eventPlayerDied = function(name)
+
+  tfm.exec.respawnPlayer(name)
+  tfm.exec.freezePlayer(name, true, false)
+  Data[name]:SetPos(400, 200)
+  Data[name]:updateSprite("DOWN", 2, 2)
+end
+
 eventLoop = function()
  for k, v in next, Data do
-    v:addHealth(0.25)
-    v:updateHealth()
+    --v:addHealth(0.25)
+    --v:updateHealth()
  end
 end
