@@ -112,36 +112,36 @@ local Data = function(name)
                 self:setSprite("UP", 2, 2, "UP")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, 0, -15, true)
+                tfm.exec.movePlayer(name, 0, 0, false, 0, -25, false)
                 Dolater(500, function()
-                    tfm.exec.movePlayer(name, 0, 0, false, 0, 15, true)  
+                    tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             elseif key == KEY_A then
                 self.lastKey = key
                 self:setSprite("RIGHT", -2, 2, "LEFT")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, -15, 0, true)
+                tfm.exec.movePlayer(name, 0, 0, false, -25, 0, false)
                 Dolater(500, function()
-                    tfm.exec.movePlayer(name, 0, 0, false, 15, 0, true)  
+                    tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             elseif key == KEY_S then
                 self.lastKey = key
                 self:setSprite("DOWN", 2, 2, "DOWN")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, 0, 15, true)
+                tfm.exec.movePlayer(name, 0, 0, false, 0, 25, false)
                 Dolater(500, function()
-                    tfm.exec.movePlayer(name, 0, 0, false, 0, -15, true)  
+                    tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             elseif key == KEY_D then
                 self.lastKey = key
                 self:setSprite("RIGHT", 2, 2, "RIGHT")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, 15, 0, true)
+                tfm.exec.movePlayer(name, 0, 0, false, 25, 0, false)
                 Dolater(500, function()
-                    tfm.exec.movePlayer(name, 0, 0, false, -15, 0, true)  
+                    tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             end
         end
@@ -189,6 +189,12 @@ eventLoop = function()
           v:keys(v:get("lastKey"), true)
        end
     end
+end
+
+eventPlayerDied = function(name)
+    tfm.exec.respawnPlayer(name)
+    Datas[name]:setSprite("DOWN", 2, 2, "DOWN")
+    tfm.exec.freezePlayer(name, true, false)
 end
 
 for _, v in next, tfm.get.room.playerList do
