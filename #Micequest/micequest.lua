@@ -22,9 +22,12 @@ local RES = {
     },
     SPRITES = {
       MICE = {
-        ["DOWN" ] = "17eed490d4e.png",
-        ["RIGHT"] = "17eed4e062c.png",
-        ["UP"   ] = "17eed52eb45.png",
+        ["DOWN1" ] = "17eed490d4e.png",
+        ["DOWN2" ] = "17eed49a8d4.png",
+        ["RIGHT1"] = "17eed4e062c.png",
+        ["RIGHT2"] = "17eed4fda33.png",
+        ["UP1"   ] = "17eed52eb45.png",
+        ["UP2"   ] = "17eed538559.png",
       },
       MAP = {
         ["1"] = "17b9e02a563.png",
@@ -89,6 +92,8 @@ local Data = function(name)
         lastMove = 0,
         lastKey,
         holdingInput = false,
+        sizeX = 2,
+        sizeY = 2,
         x = 400,
         y = 200,
     }
@@ -99,6 +104,8 @@ local Data = function(name)
         end
         self.frame = tfm.exec.addImage(RES.SPRITES.MICE[frame], "%" .. name, w > 0 and -15 or 15, -50, nil, w, h)
         self.side = side
+        self.sizeX = w
+        self.sizeY = h
     end
 
     function instance:keys(key, down)
@@ -109,38 +116,42 @@ local Data = function(name)
         if self.canWalk == true then
             if key == KEY_W then
                 self.lastKey = key
-                self:setSprite("UP", 2, 2, "UP")
+                self:setSprite("UP2", 2, 2, "UP")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, 0, -25, false)
+                tfm.exec.movePlayer(name, 0, 0, false, 0, -20, false)
                 Dolater(500, function()
+                    self:setSprite("UP1", 2, 2, "UP")
                     tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             elseif key == KEY_A then
                 self.lastKey = key
-                self:setSprite("RIGHT", -2, 2, "LEFT")
+                self:setSprite("RIGHT2", -2, 2, "RIGHT")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, -25, 0, false)
+                tfm.exec.movePlayer(name, 0, 0, false, -20, 0, false)
                 Dolater(500, function()
+                    self:setSprite("RIGHT1", -2, 2, "RIGHT")
                     tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             elseif key == KEY_S then
                 self.lastKey = key
-                self:setSprite("DOWN", 2, 2, "DOWN")
+                self:setSprite("DOWN2", 2, 2, "DOWN")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, 0, 25, false)
+                tfm.exec.movePlayer(name, 0, 0, false, 0, 20, false)
                 Dolater(500, function()
+                    self:setSprite("DOWN1", 2, 2, "DOWN")
                     tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             elseif key == KEY_D then
                 self.lastKey = key
-                self:setSprite("RIGHT", 2, 2, "RIGHT")
+                self:setSprite("RIGHT2", 2, 2, "RIGHT")
                 self.canWalk = false
                 self.lastMove = os.time() + 500
-                tfm.exec.movePlayer(name, 0, 0, false, 25, 0, false)
+                tfm.exec.movePlayer(name, 0, 0, false, 20, 0, false)
                 Dolater(500, function()
+                    self:setSprite("RIGHT1", 2, 2, "RIGHT")
                     tfm.exec.movePlayer(name, 0, 0, false, 0, 0, false)  
                 end)
             end
@@ -157,6 +168,7 @@ eventKeyboard = function(name, key, down)
     if Datas[name].isDead == false then
         Datas[name]:keys(key, down)
     end
+    eventLoop()
 end
 
 eventNewPlayer = function(name)
@@ -169,7 +181,7 @@ eventNewPlayer = function(name)
         tfm.exec.bindKeyboard(name, v, true, true)
         tfm.exec.bindKeyboard(name, v, false, true)
     end
-    Datas[name]:setSprite("DOWN", 2, 2, "DOWN")
+    Datas[name]:setSprite("DOWN1", 2, 2, "DOWN")
 end
 
 eventLoop = function()
@@ -187,16 +199,20 @@ eventLoop = function()
     for k, v in next, Datas do
        if v:get("holdingInput") == true then
           v:keys(v:get("lastKey"), true)
+       else
+          v:setSprite(v:get("side") .. "1", v:get("sizeX"), v:get("sizeY"), v:get("side"))
        end
     end
 end
 
 eventPlayerDied = function(name)
     tfm.exec.respawnPlayer(name)
-    Datas[name]:setSprite("DOWN", 2, 2, "DOWN")
+    Datas[name]:setSprite("DOWN1", 2, 2, "DOWN")
     tfm.exec.freezePlayer(name, true, false)
 end
 
 for _, v in next, tfm.get.room.playerList do
     eventNewPlayer(v.playerName)
 end
+
+
